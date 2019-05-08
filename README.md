@@ -1,4 +1,4 @@
-# synthesizer
+# Synthesizer
 
 Application permettant de convertir le texte en voie.
 
