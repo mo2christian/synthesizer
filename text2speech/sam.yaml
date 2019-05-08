@@ -1,0 +1,54 @@
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+
+  Text2Speech:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: text2speech
+      Runtime: java8
+      CodeUri: target/text2speech.jar
+      Handler: com.mo2christian.translate.text2speech.Handler::handleRequest
+      Timeout: 30
+      MemorySize: 256
+      Policies:
+        - AWSLambdaExecute
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+                - s3:GetObject
+              Resource: 'arn:aws:s3:::com.mo2christian-polly/*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - polly:SynthesizeSpeech
+              Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: '*'
+      Tracing: Active
+      Environment:
+        Variables:
+          REGION: eu-west-3
+          BUCKET: com.mo2christian-polly
+      Events:
+        ThumbnailApi:
+          Type: Api
+          Properties:
+            Path: /synthesize
+            Method: POST
+            RestApiId: !Ref Test2SpeechAPI
+
+  Test2SpeechAPI:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      Name: text2speech
+      StageName: test
+      DefinitionUri: swagger.yaml
+      EndpointConfiguration: REGIONAL
+      TracingEnabled: true

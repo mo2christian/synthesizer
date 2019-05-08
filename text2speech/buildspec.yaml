@@ -1,0 +1,19 @@
+version: 0.2
+environment_variables:
+  plaintext:
+    "S3_BUCKET": "com.mo2christian-polly"
+    "REGION": "eu-west-3"
+phases:
+  build:
+    commands:
+      - mvn -Pprod clean package
+      - aws cloudformation package --template-file sam.yaml --s3-bucket $S3_BUCKET --output-template-file packaged.yaml
+      - aws cloudformation deploy --template-file packaged.yaml --stack-name translator-text2speech --region $REGION --capabilities CAPABILITY_IAM
+artifacts:
+  files:
+    - target/*.jar
+    - packaged.yaml
+  discard-paths: yes
+cache:
+  paths:
+    - '/root/.m2/**/*'

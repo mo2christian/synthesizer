@@ -1,0 +1,76 @@
+swagger: "2.0"
+info:
+  description: "Text2Speech API"
+  version: "0.1.0"
+  title: "Text2Speech API"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "text2speech.just2teach.com"
+basePath: "/v1"
+schemes:
+  - "https"
+  - "http"
+paths:
+  /synthesize:
+    post:
+      tags:
+        - "synthesize"
+      summary: "Convert text to speech"
+      description: ""
+      operationId: "synthesize"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Request object use to convert text to speech"
+          required: true
+          schema:
+            $ref: "#/definitions/Request"
+      responses:
+        405:
+          description: "Invalid input"
+        500:
+          description: "Internal error"
+        200:
+          $ref: "#/definitions/Response"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+            responseTemplates :
+              application/json : "#set($inputRoot = $input.path('$')){\"text\" : \"$inputRoot.text\", \"link\" : \"$inputRoot.link\" }"
+        passthroughBehavior: when_no_match
+        httpMethod: POST  # Keep "POST" when the API definition method is not POST. This "httpMethod" is used to call Lambda.
+        uri: "arn:aws:apigateway:eu-west-3:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-3:XXXXXXXXXX:function:text2speech/invocations"
+        type: aws
+securityDefinitions:
+definitions:
+  Request:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      language:
+        type: "string"
+      gender:
+        type: "string"
+        enum:
+          - "M"
+          - "F"
+  Response:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      link:
+        type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
